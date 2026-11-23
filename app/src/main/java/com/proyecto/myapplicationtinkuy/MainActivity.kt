@@ -59,6 +59,7 @@ import com.proyecto.myapplicationtinkuy.ui.theme.MyApplicationTinkuyTheme
 import com.proyecto.myapplicationtinkuy.ui.screens.login.LoginScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.welcome.WelcomeScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.RegisterScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.login.PasswordScreen
 
 internal val Ink = Color(0xFF1D2723)
 internal val Muted = Color(0xFF586761)
@@ -174,7 +175,10 @@ private fun TinkuyApp() {
             onBack = { go(Screen.Login) },
             onNext = { go(Screen.Password) }
         )
-        Screen.Password -> Password(go)
+        Screen.Password -> PasswordScreen(
+            onBack = { go(Screen.Register) },
+            onCreateAccount = { go(Screen.Verify) }
+        )
         Screen.Verify -> Verify(go)
         Screen.Forgot -> Forgot(go)
         Screen.Home -> Home(go, homeCategory, { homeCategory = it }, homeQuery, { homeQuery = it }, openProduct)
@@ -257,36 +261,7 @@ private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
     }
 }
 
-@Composable
-private fun Register(go: (Screen) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }; var surname by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }; var phone by rememberSaveable { mutableStateOf("") }
-    Form(true, { go(Screen.Welcome) }) {
-        Spacer(Modifier.height(20.dp)); Text("Registro de usuario", fontSize = 26.sp); Spacer(Modifier.height(17.dp))
-        ValidField("Nombres", "Ingresa tus apellidos", name, { name = it }, "Por favor ingresa un nombre válido")
-        Spacer(Modifier.height(9.dp)); ValidField("Apellidos", "Ingresa tus apellidos", surname, { surname = it }, "Por favor ingresa un apellido válido")
-        Spacer(Modifier.height(9.dp)); ValidField("Correo electrónico", "ejemplo@correo.com", email, { email = it }, "Por favor ingresa un correo válido")
-        Spacer(Modifier.height(9.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { Field("Code", "+44", {}, Modifier.width(83.dp), readOnly = true); Field("Teléfono", phone, { phone = it }, Modifier.weight(1f), "999999999", KeyboardType.Phone) }
-        Error("Por favor ingresa un número de teléfono válido"); Spacer(Modifier.height(10.dp))
-        BlackButton("Siguiente", Modifier.fillMaxWidth()) { go(Screen.Password) }
-        Spacer(Modifier.weight(1f))
-    }
-}
 
-@Composable
-private fun Password(go: (Screen) -> Unit) {
-    var password by rememberSaveable { mutableStateOf("") }; var repeat by rememberSaveable { mutableStateOf("") }
-    Form(true, { go(Screen.Register) }) {
-        Spacer(Modifier.height(36.dp)); Text("Crea tu contraseña", fontSize = 26.sp); Spacer(Modifier.height(23.dp))
-        Field("Contraseña", password, { password = it }, key = KeyboardType.Password)
-        Text("Contraseña segura", Modifier.padding(start = 8.dp, top = 6.dp), color = Green, fontSize = 12.sp)
-        Row(Modifier.fillMaxWidth().padding(8.dp, 7.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) { repeat(3) { Box(Modifier.weight(1f).height(5.dp).clip(CircleShape).background(Color(0xFF78E08F))) } }
-        Field("Repetir contraseña", repeat, { repeat = it }, key = KeyboardType.Password)
-        Text("Las contraseñas deben ser iguales", Modifier.padding(start = 8.dp, top = 4.dp), color = Color(0xFFFF6D36), fontSize = 12.sp)
-        Spacer(Modifier.height(24.dp)); BlackButton("Crear Cuenta", Modifier.fillMaxWidth()) { go(Screen.Verify) }; Spacer(Modifier.weight(1f))
-    }
-}
 
 @Composable
 private fun Verify(go: (Screen) -> Unit) {

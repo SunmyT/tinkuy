@@ -11,3 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val TinkuyGreen = Color(0xFF1F8E34)
+val PasswordWeak = Color(0xFFE53935)   // Débil
+val PasswordMedium = Color(0xFFFFA000) // Media
+val PasswordStrong = Color(0xFF43A047) // Fuerte
