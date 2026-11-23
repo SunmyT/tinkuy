@@ -6,9 +6,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,13 +20,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,6 +56,10 @@ import com.proyecto.myapplicationtinkuy.ui.order.ShopOrderItem
 import com.proyecto.myapplicationtinkuy.ui.order.OrdersScreen
 import com.proyecto.myapplicationtinkuy.ui.order.TrackingScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.CatalogScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.DetailScreen
+import com.proyecto.myapplicationtinkuy.ui.components.Avatar
+import com.proyecto.myapplicationtinkuy.ui.components.Placeholder
+import com.proyecto.myapplicationtinkuy.ui.components.BlackButton
 import com.proyecto.myapplicationtinkuy.ui.order.sampleOrders
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
@@ -209,7 +206,13 @@ private fun TinkuyApp() {
             { catalogQuery = it },
             openProduct
         )
-        Screen.Detail -> Detail(product, go, back) { changeQuantity(product, 1) }
+        Screen.Detail -> DetailScreen(
+            product,
+            go,
+            back
+        ) {
+            changeQuantity(product, 1)
+        }
         Screen.Producer -> Producer(product, go, openProduct)
         Screen.Cart -> if (quantities.any { it > 0 }) Cart(go, quantities, changeQuantity, confirmCart) else EmptyCart(go)
         Screen.OrderDone -> OrderDone(go)
@@ -252,44 +255,6 @@ private fun TinkuyApp() {
         )
     }
 }
-
-@Composable
-private fun Detail(product: Product, go: (Screen) -> Unit, back: () -> Unit, add: () -> Unit) = Page(Screen.Detail, go) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Box(Modifier.fillMaxWidth().height(352.dp)) {
-            Thumb(product, Modifier.matchParentSize())
-            IconButton(onClick = back, modifier = Modifier.padding(12.dp).background(Color.White, CircleShape)
-                .semantics { contentDescription = "Volver" }) {
-                TinkuyIcon(AppIcon.Back, tint = Ink)
-            }
-            IconButton(onClick = { go(Screen.Favorites) }, modifier = Modifier.align(Alignment.TopEnd)
-                .padding(12.dp).background(Color.White, CircleShape).semantics { contentDescription = "Favoritos" }) {
-                TinkuyIcon(AppIcon.Heart, tint = Accent)
-            }
-            Text(
-                "Foto referencial", Modifier.align(Alignment.BottomEnd).padding(12.dp)
-                    .background(Color.White, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp),
-                fontSize = 12.sp
-            )
-        }
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 19.dp, topEnd = 19.dp)).background(Color.White).padding(26.dp, 23.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) { Text(product.title, Modifier.weight(1f), fontSize = 23.sp); Text("★ ★ ★ ★ (5.0)", fontSize = 12.sp) }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(product.price, Modifier.alignByBaseline(), fontSize = 25.sp)
-                Text("por unidad", Modifier.alignByBaseline(), color = Muted, fontSize = 12.sp)
-            }
-            Spacer(Modifier.height(15.dp))
-            Text("Disponible: 20 unidades", fontSize = 12.sp); Text(product.description, fontSize = 12.sp, color = Color(0xFF656565)); Spacer(Modifier.height(14.dp))
-            Row(Modifier.fillMaxWidth().height(52.dp).background(Color(0xFFFAFAFA)).clickable { go(Screen.Producer) }, verticalAlignment = Alignment.CenterVertically) {
-                Placeholder(Modifier.size(45.dp).padding(4.dp)); Column(Modifier.padding(start = 9.dp).weight(1f)) { Text("Producido por", fontSize = 9.sp, color = Muted); Text(product.producer, fontSize = 14.sp); Text(product.region, fontSize = 9.sp) }; Text("✓", Modifier.size(20.dp).clip(CircleShape).background(Color(0xFF536BFF)).padding(start = 5.dp, top = 1.dp), color = Color.White)
-            }
-            Spacer(Modifier.height(11.dp)); Text("Opiniones de compradores", fontSize = 16.sp); Divider(Modifier.width(76.dp).padding(top = 10.dp), color = Ink, thickness = 4.dp)
-            Row(Modifier.padding(top = 9.dp), verticalAlignment = Alignment.CenterVertically) { Avatar(Modifier.size(31.dp), false); Text("Jane Doe", Modifier.padding(start = 10.dp)); Spacer(Modifier.weight(1f)); Text("★ ★ ★ ★", fontSize = 14.sp) }
-            Spacer(Modifier.height(16.dp)); Row(horizontalArrangement = Arrangement.spacedBy(13.dp)) { BlackButton("Cotizar", Modifier.weight(1f)) { go(Screen.Quote) }; BlackButton("Agregar", Modifier.weight(1f)) { add(); go(Screen.Cart) } }
-        }
-    }
-}
-
 @Composable
 private fun Producer(product: Product, go: (Screen) -> Unit, openProduct: (Product) -> Unit) = Page(Screen.Producer, go) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 36.dp)) {
@@ -551,13 +516,6 @@ private fun Proposals(
 }
 
 @Composable
-internal fun BlackButton(label: String, modifier: Modifier = Modifier, action: () -> Unit) {
-    Button(action, modifier.heightIn(min = 48.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color.White)) {
-        Text(label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-    }
-}
-
-@Composable
 private fun Field(label: String, value: String, change: (String) -> Unit, modifier: Modifier = Modifier.fillMaxWidth(), hint: String = "", key: KeyboardType = KeyboardType.Text, single: Boolean = true, readOnly: Boolean = false) {
     OutlinedTextField(
         value, change, modifier,
@@ -587,40 +545,6 @@ private fun Tabs(labels: List<String>, selected: Int) {
     Row(Modifier.fillMaxWidth()) { Box(Modifier.weight(1f / labels.size).height(4.dp).background(Color.Black)); Spacer(Modifier.weight(1f - 1f / labels.size)) }; Divider(color = Line)
 }
 
-
-@Composable
-private fun CatalogRow(product: Product, open: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    Row(
-        Modifier.fillMaxWidth().clip(shape).background(Color.White).border(1.dp, Line, shape)
-            .clickable(onClick = open).padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Thumb(product, Modifier.size(72.dp).clip(RoundedCornerShape(10.dp)))
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(product.title, color = Ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            Text(product.maker, color = Muted, fontSize = 13.sp)
-            Text(product.price, color = Accent, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        }
-        TinkuyIcon(AppIcon.ChevronRight, Modifier.size(18.dp), Muted)
-    }
-}
-
-@Composable
-private fun Placeholder(modifier: Modifier, pale: Boolean = false) {
-    Canvas(modifier) {
-        val color = if (pale) Color(0xFFD8D8D8) else Color(0xFF222222); val inset = size.minDimension * .2f; val side = size.minDimension - inset * 2
-        drawRect(color, Offset(inset, inset), Size(side, side), style = Stroke(width = if (pale) 1f else 1.5f)); drawLine(color, Offset(inset, inset), Offset(inset + side, inset + side), strokeWidth = if (pale) 1f else 1.5f); drawLine(color, Offset(inset + side, inset), Offset(inset, inset + side), strokeWidth = if (pale) 1f else 1.5f)
-    }
-}
-
-@Composable
-private fun Avatar(modifier: Modifier, person: Boolean = true) {
-    Box(modifier.clip(CircleShape).background(Color(0xFFDCE0E4)), contentAlignment = Alignment.Center) {
-        if (person) Canvas(Modifier.fillMaxSize()) { drawCircle(Color.White, size.minDimension * .18f, Offset(size.width / 2, size.height * .35f)); drawCircle(Color.White, size.minDimension * .34f, Offset(size.width / 2, size.height * .87f)) } else Placeholder(Modifier.fillMaxSize().padding(29.dp), true)
-    }
-}
 @Composable
 private fun CartLine(product: Product, count: Int, down: () -> Unit, up: () -> Unit) {
     Row(Modifier.fillMaxWidth().height(113.dp), verticalAlignment = Alignment.CenterVertically) {
