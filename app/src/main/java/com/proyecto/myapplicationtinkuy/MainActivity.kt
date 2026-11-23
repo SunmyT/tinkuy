@@ -60,6 +60,8 @@ import com.proyecto.myapplicationtinkuy.ui.screens.DetailScreen
 import com.proyecto.myapplicationtinkuy.ui.components.Avatar
 import com.proyecto.myapplicationtinkuy.ui.components.Placeholder
 import com.proyecto.myapplicationtinkuy.ui.components.BlackButton
+import com.proyecto.myapplicationtinkuy.ui.components.Tabs
+import com.proyecto.myapplicationtinkuy.ui.screens.ProducerScreen
 import com.proyecto.myapplicationtinkuy.ui.order.sampleOrders
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
@@ -213,7 +215,7 @@ private fun TinkuyApp() {
         ) {
             changeQuantity(product, 1)
         }
-        Screen.Producer -> Producer(product, go, openProduct)
+        Screen.Producer -> ProducerScreen(product, go, openProduct)
         Screen.Cart -> if (quantities.any { it > 0 }) Cart(go, quantities, changeQuantity, confirmCart) else EmptyCart(go)
         Screen.OrderDone -> OrderDone(go)
         Screen.Quote -> Quote(product, go)
@@ -255,25 +257,6 @@ private fun TinkuyApp() {
         )
     }
 }
-@Composable
-private fun Producer(product: Product, go: (Screen) -> Unit, openProduct: (Product) -> Unit) = Page(Screen.Producer, go) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 36.dp)) {
-        IconButton(onClick = { go(Screen.Detail) }, modifier = Modifier.padding(horizontal = 18.dp)) {
-            TinkuyIcon(AppIcon.Back, tint = Ink, contentDescription = "Volver")
-        }
-        Spacer(Modifier.height(3.dp))
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Placeholder(Modifier.size(100.dp)); Text(product.producer, fontSize = 23.sp); Text(product.region, fontSize = 11.sp, color = Muted)
-            Row { Text("4.0", fontSize = 22.sp); Text(" | ", fontSize = 22.sp); Text("★★★★★", color = Color(0xFFFFC526), fontSize = 18.sp) }; Text("(122 ratings)", color = Muted, fontSize = 14.sp); Spacer(Modifier.height(17.dp))
-            if (product.producer == Alpaca.producer) {
-                Text("Asociación de 18 mujeres tejedoras que preservan técnicas ancestrales y trabajan con fibra natural de alpaca.", Modifier.padding(horizontal = 24.dp), textAlign = TextAlign.Center, color = Color(0xFF595959), fontSize = 13.sp)
-            }
-        }
-        Spacer(Modifier.height(19.dp)); Tabs(listOf("Productos", "Opiniones", "Acerca de"), 0)
-        Grid(Product.entries.filter { it.producer == product.producer }, openProduct, Modifier.padding(18.dp))
-    }
-}
-
 @Composable
 private fun Cart(
     go: (Screen) -> Unit,
@@ -538,13 +521,6 @@ private fun Field(label: String, value: String, change: (String) -> Unit, modifi
         )
     )
 }
-
-@Composable
-private fun Tabs(labels: List<String>, selected: Int) {
-    Row(Modifier.fillMaxWidth().height(47.dp), horizontalArrangement = Arrangement.SpaceEvenly) { labels.forEachIndexed { index, label -> Text(label, Modifier.weight(1f).padding(top = 13.dp), color = if (index == selected) Ink else Muted, fontSize = 14.sp, textAlign = TextAlign.Center) } }
-    Row(Modifier.fillMaxWidth()) { Box(Modifier.weight(1f / labels.size).height(4.dp).background(Color.Black)); Spacer(Modifier.weight(1f - 1f / labels.size)) }; Divider(color = Line)
-}
-
 @Composable
 private fun CartLine(product: Product, count: Int, down: () -> Unit, up: () -> Unit) {
     Row(Modifier.fillMaxWidth().height(113.dp), verticalAlignment = Alignment.CenterVertically) {

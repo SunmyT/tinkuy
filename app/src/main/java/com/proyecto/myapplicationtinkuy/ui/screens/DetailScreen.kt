@@ -1,6 +1,7 @@
 
 package com.proyecto.myapplicationtinkuy.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,19 +17,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.proyecto.myapplicationtinkuy.AppIcon
+import com.proyecto.myapplicationtinkuy.ProducerImages
 import com.proyecto.myapplicationtinkuy.ui.components.BlackButton
 import com.proyecto.myapplicationtinkuy.Product
 import com.proyecto.myapplicationtinkuy.Screen
 import com.proyecto.myapplicationtinkuy.TinkuyIcon
 import com.proyecto.myapplicationtinkuy.ui.components.Avatar
 import com.proyecto.myapplicationtinkuy.ui.components.Page
-import com.proyecto.myapplicationtinkuy.ui.components.Placeholder
 import com.proyecto.myapplicationtinkuy.ui.components.Thumb
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
@@ -47,7 +50,6 @@ internal fun DetailScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-
         // Contenido desplazable
         Column(
             modifier = Modifier
@@ -55,7 +57,6 @@ internal fun DetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 82.dp)
         ) {
-
             // Imagen del producto
             Box(
                 modifier = Modifier
@@ -132,7 +133,6 @@ internal fun DetailScreen(
                         vertical = 20.dp
                     )
             ) {
-
                 // Nombre y valoración
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -210,9 +210,15 @@ internal fun DetailScreen(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Placeholder(
-                        modifier = Modifier.size(42.dp),
-                        pale = true
+                    Image(
+                        painter = painterResource(
+                            id = ProducerImages.defaultImage
+                        ),
+                        contentDescription = "Foto del productor ${product.producer}",
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
 
                     Column(
