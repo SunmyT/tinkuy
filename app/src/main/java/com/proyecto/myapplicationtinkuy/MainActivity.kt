@@ -7,18 +7,13 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -31,23 +26,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,14 +51,10 @@ import com.proyecto.myapplicationtinkuy.ui.screens.login.PasswordScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.VerifyScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.ForgotPasswordScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.HomeScreen
-import com.proyecto.myapplicationtinkuy.ui.components.CategoryChips
-import com.proyecto.myapplicationtinkuy.ui.components.EmptySearch
 import com.proyecto.myapplicationtinkuy.ui.components.Grid
-import com.proyecto.myapplicationtinkuy.ui.components.Search
 import com.proyecto.myapplicationtinkuy.ui.components.Thumb
 import com.proyecto.myapplicationtinkuy.ui.screens.NotificationsScreen
 import com.proyecto.myapplicationtinkuy.ui.components.Page
-import com.proyecto.myapplicationtinkuy.ui.components.BottomNav
 import com.proyecto.myapplicationtinkuy.ui.components.Header
 import com.proyecto.myapplicationtinkuy.ui.order.OrderFilter
 import com.proyecto.myapplicationtinkuy.ui.order.OrderStatus
@@ -78,6 +62,7 @@ import com.proyecto.myapplicationtinkuy.ui.order.ShopOrder
 import com.proyecto.myapplicationtinkuy.ui.order.ShopOrderItem
 import com.proyecto.myapplicationtinkuy.ui.order.OrdersScreen
 import com.proyecto.myapplicationtinkuy.ui.order.TrackingScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.CatalogScreen
 import com.proyecto.myapplicationtinkuy.ui.order.sampleOrders
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
@@ -216,7 +201,14 @@ private fun TinkuyApp() {
             { homeQuery = it },
             openProduct
         )
-        Screen.Catalog -> Catalog(go, catalogCategory, { catalogCategory = it }, catalogQuery, { catalogQuery = it }, openProduct)
+        Screen.Catalog -> CatalogScreen(
+            go,
+            catalogCategory,
+            { catalogCategory = it },
+            catalogQuery,
+            { catalogQuery = it },
+            openProduct
+        )
         Screen.Detail -> Detail(product, go, back) { changeQuantity(product, 1) }
         Screen.Producer -> Producer(product, go, openProduct)
         Screen.Cart -> if (quantities.any { it > 0 }) Cart(go, quantities, changeQuantity, confirmCart) else EmptyCart(go)
@@ -258,42 +250,6 @@ private fun TinkuyApp() {
                 handledProposals = ArrayList(handledProposals + item.product.name)
             }
         )
-    }
-}
-
-@Composable
-private fun Catalog(
-    go: (Screen) -> Unit,
-    category: Category,
-    selectCategory: (Category) -> Unit,
-    query: String,
-    onQueryChange: (String) -> Unit,
-    openProduct: (Product) -> Unit
-) = Page(Screen.Catalog, go) {
-    val focus = LocalFocusManager.current
-    val products = remember(category, query) { category.products(query) }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text("Catálogo", color = Ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-        Search(query, onQueryChange)
-        CategoryChips(category, {
-            focus.clearFocus()
-            selectCategory(it)
-        })
-        if (products.isEmpty()) {
-            EmptySearch { onQueryChange("") }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                products.forEach { product ->
-                    CatalogRow(product) {
-                        focus.clearFocus()
-                        openProduct(product)
-                    }
-                }
-            }
-        }
     }
 }
 
