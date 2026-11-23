@@ -1,4 +1,4 @@
-package com.proyecto.myapplicationtinkuy
+package com.proyecto.myapplicationtinkuy.ui.screens
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -41,8 +41,16 @@ import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Line
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
+import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen
+import com.proyecto.myapplicationtinkuy.*
+import com.proyecto.myapplicationtinkuy.ui.components.Header
+import com.proyecto.myapplicationtinkuy.ui.components.Page
 
-private enum class NotificationPreference(val key: String, val title: String, val description: String) {
+private enum class NotificationPreference(
+    val key: String,
+    val title: String,
+    val description: String
+) {
     Proposals(
         "received_proposals",
         "Propuestas recibidas",
@@ -61,39 +69,72 @@ private enum class NotificationPreference(val key: String, val title: String, va
 }
 
 @Composable
-internal fun Notifications(go: (Screen) -> Unit, back: () -> Unit) {
+internal fun Notifications(
+    go: (Screen) -> Unit,
+    back: () -> Unit
+) {
     val context = LocalContext.current
     val preferences = remember(context) {
-        context.getSharedPreferences("notification_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences(
+            "notification_preferences",
+            Context.MODE_PRIVATE
+        )
     }
+
     var settings by remember(preferences) {
-        mutableStateOf(NotificationPreference.entries.associateWith { preferences.getBoolean(it.key, false) })
+        mutableStateOf(
+            NotificationPreference.entries.associateWith {
+                preferences.getBoolean(it.key, false)
+            }
+        )
     }
 
     Page(Screen.Notifications, go) {
-        Column(Modifier.fillMaxSize().background(AppBackground)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(AppBackground)
+        ) {
             Header("Notificaciones", back = back)
+
             Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
             ) {
                 Row(
-                    Modifier.fillMaxWidth().padding(top = 12.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        Modifier.size(48.dp).background(Accent.copy(alpha = 0.10f), CircleShape),
+                        Modifier
+                            .size(48.dp)
+                            .background(
+                                TinkuyGreen.copy(alpha = 0.10f),
+                                CircleShape
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        TinkuyIcon(AppIcon.Bell, modifier = Modifier.size(24.dp), tint = Accent)
+                        TinkuyIcon(
+                            AppIcon.Bell,
+                            modifier = Modifier.size(24.dp),
+                            tint = TinkuyGreen
+                        )
                     }
+
                     Text(
                         "Elige qué avisos quieres activar para tu actividad en Tinkuy.",
                         color = Muted,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
+
                 Spacer(Modifier.height(24.dp))
+
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -102,14 +143,26 @@ internal fun Notifications(go: (Screen) -> Unit, back: () -> Unit) {
                 ) {
                     Column {
                         NotificationPreference.entries.forEachIndexed { index, preference ->
-                            if (index > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = Line)
-                            NotificationPreferenceRow(preference, settings.getValue(preference)) { checked ->
+                            if (index > 0) {
+                                HorizontalDivider(
+                                    Modifier.padding(horizontal = 16.dp),
+                                    color = Line
+                                )
+                            }
+
+                            NotificationPreferenceRow(
+                                preference = preference,
+                                checked = settings.getValue(preference)
+                            ) { checked ->
                                 settings = settings + (preference to checked)
-                                preferences.edit().putBoolean(preference.key, checked).apply()
+                                preferences.edit()
+                                    .putBoolean(preference.key, checked)
+                                    .apply()
                             }
                         }
                     }
                 }
+
                 Spacer(Modifier.height(24.dp))
             }
         }
@@ -123,26 +176,41 @@ private fun NotificationPreferenceRow(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 84.dp)
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 84.dp)
+            .toggleable(
+                value = checked,
+                role = Role.Switch,
+                onValueChange = onCheckedChange
+            )
             .padding(horizontal = 16.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             Text(
                 preference.title,
                 color = Ink,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
-            Text(preference.description, color = Muted, style = MaterialTheme.typography.bodyMedium)
+
+            Text(
+                preference.description,
+                color = Muted,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
+
         Switch(
             checked = checked,
             onCheckedChange = null,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = Accent,
+                checkedTrackColor = TinkuyGreen,
                 checkedThumbColor = Color.White,
                 uncheckedTrackColor = AppBackground,
                 uncheckedThumbColor = Muted,

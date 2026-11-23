@@ -42,6 +42,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import com.proyecto.myapplicationtinkuy.ui.components.Thumb
+import com.proyecto.myapplicationtinkuy.ui.components.Page
+import com.proyecto.myapplicationtinkuy.ui.components.Header
 
 private val OrderAccent = Color(0xFF17594D)
 private val OrderAccentSoft = Color(0xFFE3F2EB)

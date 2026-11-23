@@ -21,6 +21,7 @@ import com.proyecto.myapplicationtinkuy.ui.components.CategoryChips
 import com.proyecto.myapplicationtinkuy.ui.components.EmptySearch
 import com.proyecto.myapplicationtinkuy.ui.components.Grid
 import com.proyecto.myapplicationtinkuy.ui.components.Search
+import com.proyecto.myapplicationtinkuy.ui.components.Page
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
 import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen

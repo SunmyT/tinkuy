@@ -68,6 +68,10 @@ import com.proyecto.myapplicationtinkuy.ui.components.EmptySearch
 import com.proyecto.myapplicationtinkuy.ui.components.Grid
 import com.proyecto.myapplicationtinkuy.ui.components.Search
 import com.proyecto.myapplicationtinkuy.ui.components.Thumb
+import com.proyecto.myapplicationtinkuy.ui.screens.Notifications
+import com.proyecto.myapplicationtinkuy.ui.components.Page
+import com.proyecto.myapplicationtinkuy.ui.components.BottomNav
+import com.proyecto.myapplicationtinkuy.ui.components.Header
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Line
@@ -234,106 +238,6 @@ private fun TinkuyApp() {
                 handledProposals = ArrayList(handledProposals + item.product.name)
             }
         )
-    }
-}
-
-@Composable
-internal fun Page(screen: Screen, go: (Screen) -> Unit, bottom: Boolean = true, body: @Composable BoxScope.() -> Unit) {
-    val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
-    Column(Modifier.fillMaxSize().background(AppBackground)) {
-        Box(Modifier.weight(1f), content = body)
-        if (bottom && !keyboardVisible) BottomNav(screen, go)
-    }
-}
-
-@Composable
-private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
-    val choices = listOf(
-        Triple(Screen.Home, "Inicio", AppIcon.Home),
-        Triple(Screen.Catalog, "Catálogo", AppIcon.Search),
-        Triple(Screen.Cart, "Carrito", AppIcon.Cart),
-        Triple(Screen.Profile, "Perfil", AppIcon.Profile)
-    )
-    HorizontalDivider(color = Line)
-    Row(Modifier.fillMaxWidth().background(Color.White).selectableGroup().padding(horizontal = 8.dp)) {
-        choices.forEach { (destination, label, icon) ->
-            val selected = when (destination) {
-                Screen.Home -> screen == Screen.Home
-                Screen.Catalog -> screen in listOf(Screen.Catalog, Screen.Detail, Screen.Producer, Screen.Favorites)
-                Screen.Cart -> screen in listOf(Screen.Cart, Screen.OrderDone)
-                else -> screen in listOf(Screen.Profile, Screen.Account, Screen.History, Screen.Notifications, Screen.Settings, Screen.Help, Screen.Sync, Screen.About, Screen.Orders, Screen.Tracking, Screen.Requests, Screen.Proposals)
-            }
-            val tint = if (selected) Accent else Muted
-            Column(
-                Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(14.dp))
-                    .selectable(selected = selected, role = Role.Tab, onClick = { go(destination) })
-                    .semantics { contentDescription = label }.padding(vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    Modifier.size(48.dp, 30.dp).background(if (selected) AccentSoft else Color.Transparent, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    TinkuyIcon(icon, Modifier.size(21.dp), tint)
-                }
-                Text(label, color = tint, fontSize = 12.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Home(
-    go: (Screen) -> Unit,
-    category: Category,
-    selectCategory: (Category) -> Unit,
-    query: String,
-    onQueryChange: (String) -> Unit,
-    openProduct: (Product) -> Unit
-) = Page(Screen.Home, go) {
-    val focus = LocalFocusManager.current
-    val products = remember(category, query) { category.products(query) }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(
-            Modifier.fillMaxWidth().padding(top = 22.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text("Buenas tardes", color = Muted, fontSize = 15.sp)
-                Text("Usuario", color = Ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                IconButton(onClick = { go(Screen.Favorites) }, modifier = Modifier.background(Color.White, CircleShape)) {
-                    TinkuyIcon(AppIcon.Heart, contentDescription = "Favoritos", tint = Accent)
-                }
-                IconButton(onClick = { go(Screen.Notifications) }, modifier = Modifier.background(Color.White, CircleShape)) {
-                    TinkuyIcon(AppIcon.Bell, contentDescription = "Notificaciones", tint = Accent)
-                }
-            }
-        }
-        Search(query, onQueryChange)
-        CategoryChips(category, {
-            focus.clearFocus()
-            selectCategory(it)
-        })
-        Text(
-            if (query.isBlank()) "Productos destacados" else "Resultados de búsqueda",
-            color = Ink, fontSize = 21.sp, fontWeight = FontWeight.SemiBold
-        )
-        if (products.isEmpty()) {
-            EmptySearch { onQueryChange("") }
-        } else {
-            Grid(products, { product ->
-                focus.clearFocus()
-                openProduct(product)
-            })
-        }
-        Spacer(Modifier.height(4.dp))
     }
 }
 
@@ -669,22 +573,6 @@ private fun Proposals(
         )
     }
 }
-@Composable
-private fun Form(back: Boolean, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        Column(
-            Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
-                .heightIn(min = maxHeight).padding(horizontal = 25.dp)
-        ) {
-            if (back) {
-                IconButton(onClick = onBack, modifier = Modifier.padding(top = 8.dp)) {
-                    TinkuyIcon(AppIcon.Back, tint = Ink, contentDescription = "Volver")
-                }
-            }
-            content()
-        }
-    }
-}
 
 @Composable
 internal fun Header(title: String, modifier: Modifier = Modifier, back: () -> Unit) {
@@ -732,9 +620,6 @@ private fun Field(label: String, value: String, change: (String) -> Unit, modifi
         )
     )
 }
-
-@Composable
-private fun Error(text: String) = Text(text, Modifier.padding(start = 5.dp, top = 3.dp), color = Color(0xFFFF4040), fontSize = 12.sp)
 
 @Composable
 private fun Tabs(labels: List<String>, selected: Int) {
