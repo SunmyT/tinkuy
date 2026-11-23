@@ -56,9 +56,9 @@ import com.proyecto.myapplicationtinkuy.Product.Ceramic
 import com.proyecto.myapplicationtinkuy.Product.Retablo
 import com.proyecto.myapplicationtinkuy.Product.Sheep
 import com.proyecto.myapplicationtinkuy.ui.theme.MyApplicationTinkuyTheme
-
 import com.proyecto.myapplicationtinkuy.ui.screens.login.LoginScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.welcome.WelcomeScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.login.RegisterScreen
 
 internal val Ink = Color(0xFF1D2723)
 internal val Muted = Color(0xFF586761)
@@ -170,7 +170,10 @@ private fun TinkuyApp() {
             onForgotPassword = { go(Screen.Forgot) },
             onRegister = { go(Screen.Register) }
         )
-        Screen.Register -> Register(go)
+        Screen.Register -> RegisterScreen(
+            onBack = { go(Screen.Login) },
+            onNext = { go(Screen.Password) }
+        )
         Screen.Password -> Password(go)
         Screen.Verify -> Verify(go)
         Screen.Forgot -> Forgot(go)
@@ -251,26 +254,6 @@ private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
                 Text(label, color = tint, fontSize = 12.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium)
             }
         }
-    }
-}
-
-@Composable
-private fun Login(go: (Screen) -> Unit) {
-    var email by rememberSaveable { mutableStateOf("") }; var password by rememberSaveable { mutableStateOf("") }
-    Form(false, {}) {
-        Spacer(Modifier.height(46.dp)); Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { Avatar(Modifier.size(174.dp), false) }
-        Spacer(Modifier.height(42.dp))
-        Field("Correo electrónico", email, { email = it }, key = KeyboardType.Email)
-        Error("Por favor ingresa un correo válido"); Spacer(Modifier.height(15.dp))
-        Field("Contraseña", password, { password = it }, key = KeyboardType.Password)
-        Error("Por favor ingresa una contraseña válida")
-        Text("¿Has olvidado la contraseña?", Modifier.fillMaxWidth().clickable { go(Screen.Forgot) }, textAlign = TextAlign.Center, fontSize = 12.sp, textDecoration = TextDecoration.Underline)
-        Spacer(Modifier.height(9.dp)); BlackButton("Ingresar", Modifier.fillMaxWidth()) { go(Screen.Home) }
-        Spacer(Modifier.weight(1f))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text("¿No tienes una cuenta?  ", fontSize = 14.sp); Text("Regístrate", fontSize = 14.sp, textDecoration = TextDecoration.Underline, modifier = Modifier.clickable { go(Screen.Register) })
-        }
-        Spacer(Modifier.height(44.dp))
     }
 }
 
