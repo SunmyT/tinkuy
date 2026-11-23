@@ -20,3 +20,10 @@ val Muted = Color(0xFF586761)
 val Line = Color(0xFFDFE6E2)
 val AppBackground = Color(0xFFF7F8F6)
 
+// Estados de pedidos
+val OrderPendingBackground = Color(0xFFFFF0D7)
+val OrderPendingText = Color(0xFF754606)
+
+val OrderInProgressBackground = Color(0xFFE6EFFB)
+val OrderInProgressText = Color(0xFF265381)
+

@@ -68,14 +68,22 @@ import com.proyecto.myapplicationtinkuy.ui.components.EmptySearch
 import com.proyecto.myapplicationtinkuy.ui.components.Grid
 import com.proyecto.myapplicationtinkuy.ui.components.Search
 import com.proyecto.myapplicationtinkuy.ui.components.Thumb
-import com.proyecto.myapplicationtinkuy.ui.screens.Notifications
+import com.proyecto.myapplicationtinkuy.ui.screens.NotificationsScreen
 import com.proyecto.myapplicationtinkuy.ui.components.Page
 import com.proyecto.myapplicationtinkuy.ui.components.BottomNav
 import com.proyecto.myapplicationtinkuy.ui.components.Header
+import com.proyecto.myapplicationtinkuy.ui.order.OrderFilter
+import com.proyecto.myapplicationtinkuy.ui.order.OrderStatus
+import com.proyecto.myapplicationtinkuy.ui.order.ShopOrder
+import com.proyecto.myapplicationtinkuy.ui.order.ShopOrderItem
+import com.proyecto.myapplicationtinkuy.ui.order.OrdersScreen
+import com.proyecto.myapplicationtinkuy.ui.order.TrackingScreen
+import com.proyecto.myapplicationtinkuy.ui.order.sampleOrders
 import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Line
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
+
 
 internal val Accent = Color(0xFF17594D)
 private val AccentSoft = Color(0xFFE4F0EA)
@@ -215,12 +223,24 @@ private fun TinkuyApp() {
         Screen.OrderDone -> OrderDone(go)
         Screen.Quote -> Quote(product, go)
         Screen.QuoteDone -> QuoteDone(product, go)
-        Screen.Orders -> OrdersScreen(orders, orderFilter, { orderFilter = it }, openOrder, go, back)
-        Screen.Tracking -> TrackingScreen(orders.firstOrNull { it.id == selectedOrderId } ?: orders.first(), go, back)
+        Screen.Orders -> OrdersScreen(
+            orders,
+            orderFilter,
+            { orderFilter = it },
+            openOrder,
+            go,
+            back
+        )
+
+        Screen.Tracking -> TrackingScreen(
+            orders.firstOrNull { it.id == selectedOrderId } ?: orders.first(),
+            go,
+            back
+        )
         Screen.Profile -> Profile(go)
         Screen.Account -> Account(go)
         Screen.History -> History(go)
-        Screen.Notifications -> Notifications(go, back)
+        Screen.Notifications -> NotificationsScreen(go, back)
         Screen.Settings -> Settings(go)
         Screen.Help -> Help(go)
         Screen.Sync -> Sync(go)
@@ -571,22 +591,6 @@ private fun Proposals(
             },
             dismissButton = { TextButton(onClick = { selected = null }) { Text("Cerrar") } }
         )
-    }
-}
-
-@Composable
-internal fun Header(title: String, modifier: Modifier = Modifier, back: () -> Unit) {
-    Row(
-        modifier.fillMaxWidth().heightIn(min = 68.dp).padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = back) { TinkuyIcon(AppIcon.Back, contentDescription = "Volver", tint = Ink) }
-        Text(
-            title, Modifier.weight(1f), textAlign = TextAlign.Center,
-            color = Ink, fontWeight = FontWeight.SemiBold, fontSize = 23.sp,
-            maxLines = 2, overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.width(48.dp))
     }
 }
 

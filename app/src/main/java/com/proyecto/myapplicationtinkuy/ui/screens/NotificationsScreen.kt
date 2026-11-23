@@ -69,7 +69,7 @@ private enum class NotificationPreference(
 }
 
 @Composable
-internal fun Notifications(
+internal fun NotificationsScreen(
     go: (Screen) -> Unit,
     back: () -> Unit
 ) {
