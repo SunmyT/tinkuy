@@ -37,6 +37,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
+import com.proyecto.myapplicationtinkuy.ui.theme.Ink
+import com.proyecto.myapplicationtinkuy.ui.theme.Line
+import com.proyecto.myapplicationtinkuy.ui.theme.Muted
 
 private enum class NotificationPreference(val key: String, val title: String, val description: String) {
     Proposals(

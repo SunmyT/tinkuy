@@ -62,11 +62,17 @@ import com.proyecto.myapplicationtinkuy.ui.screens.login.RegisterScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.PasswordScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.VerifyScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.ForgotPasswordScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.HomeScreen
+import com.proyecto.myapplicationtinkuy.ui.components.CategoryChips
+import com.proyecto.myapplicationtinkuy.ui.components.EmptySearch
+import com.proyecto.myapplicationtinkuy.ui.components.Grid
+import com.proyecto.myapplicationtinkuy.ui.components.Search
+import com.proyecto.myapplicationtinkuy.ui.components.Thumb
+import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
+import com.proyecto.myapplicationtinkuy.ui.theme.Ink
+import com.proyecto.myapplicationtinkuy.ui.theme.Line
+import com.proyecto.myapplicationtinkuy.ui.theme.Muted
 
-internal val Ink = Color(0xFF1D2723)
-internal val Muted = Color(0xFF586761)
-internal val Line = Color(0xFFDFE6E2)
-internal val AppBackground = Color(0xFFF7F8F6)
 internal val Accent = Color(0xFF17594D)
 private val AccentSoft = Color(0xFFE4F0EA)
 private val Green = Color(0xFF4CAF50)
@@ -190,7 +196,14 @@ private fun TinkuyApp() {
             onBack = { go(Screen.Login) },
             onSendInstructions = { go(Screen.Login) }
         )
-        Screen.Home -> Home(go, homeCategory, { homeCategory = it }, homeQuery, { homeQuery = it }, openProduct)
+        Screen.Home -> HomeScreen(
+            go,
+            homeCategory,
+            { homeCategory = it },
+            homeQuery,
+            { homeQuery = it },
+            openProduct
+        )
         Screen.Catalog -> Catalog(go, catalogCategory, { catalogCategory = it }, catalogQuery, { catalogQuery = it }, openProduct)
         Screen.Detail -> Detail(product, go, back) { changeQuantity(product, 1) }
         Screen.Producer -> Producer(product, go, openProduct)
@@ -269,9 +282,6 @@ private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
         }
     }
 }
-
-
-
 
 @Composable
 private fun Home(
@@ -724,82 +734,7 @@ private fun Field(label: String, value: String, change: (String) -> Unit, modifi
 }
 
 @Composable
-private fun ValidField(label: String, hint: String, value: String, set: (String) -> Unit, error: String) {
-    Field(label, value, set, hint = hint); Error(error)
-}
-
-@Composable
 private fun Error(text: String) = Text(text, Modifier.padding(start = 5.dp, top = 3.dp), color = Color(0xFFFF4040), fontSize = 12.sp)
-
-@Composable
-private fun Search(query: String, onQueryChange: (String) -> Unit) {
-    val focus = LocalFocusManager.current
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Buscar productos" },
-        placeholder = { Text("Buscar productos", color = Muted) },
-        leadingIcon = { TinkuyIcon(AppIcon.Search, tint = Accent) },
-        trailingIcon = if (query.isNotEmpty()) {
-            {
-                IconButton(onClick = { onQueryChange("") }) {
-                    TinkuyIcon(AppIcon.Close, tint = Muted, contentDescription = "Borrar búsqueda")
-                }
-            }
-        } else null,
-        singleLine = true,
-        shape = RoundedCornerShape(16.dp),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { focus.clearFocus() }),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Accent,
-            unfocusedBorderColor = Line,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            cursorColor = Accent
-        )
-    )
-}
-
-@Composable
-private fun EmptySearch(clearQuery: () -> Unit) {
-    Column(
-        Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(18.dp))
-            .border(1.dp, Line, RoundedCornerShape(18.dp)).padding(22.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(9.dp)
-    ) {
-        TinkuyIcon(AppIcon.Search, tint = Accent)
-        Text("No encontramos productos", fontWeight = FontWeight.SemiBold, color = Ink)
-        Text("Prueba otro nombre o cambia de categoría.", color = Muted, textAlign = TextAlign.Center)
-        TextButton(onClick = clearQuery, colors = ButtonDefaults.textButtonColors(contentColor = Accent)) {
-            Text("Borrar búsqueda")
-        }
-    }
-}
-
-@Composable
-private fun CategoryChips(category: Category, onSelect: (Category) -> Unit, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(14.dp)
-    Row(
-        modifier.selectableGroup().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Category.entries.forEach { item ->
-            val selected = category == item
-            Box(
-                Modifier.heightIn(min = 48.dp).clip(shape)
-                    .background(if (selected) Accent else Color.White)
-                    .border(1.dp, if (selected) Accent else Line, shape)
-                    .selectable(selected = selected, role = Role.Tab, onClick = { onSelect(item) })
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(item.label, color = if (selected) Color.White else Ink, fontSize = 14.sp)
-            }
-        }
-    }
-}
 
 @Composable
 private fun Tabs(labels: List<String>, selected: Int) {
@@ -807,30 +742,6 @@ private fun Tabs(labels: List<String>, selected: Int) {
     Row(Modifier.fillMaxWidth()) { Box(Modifier.weight(1f / labels.size).height(4.dp).background(Color.Black)); Spacer(Modifier.weight(1f - 1f / labels.size)) }; Divider(color = Line)
 }
 
-@Composable
-private fun Grid(products: List<Product>, openProduct: (Product) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        products.chunked(2).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { product -> Card(product, Modifier.weight(1f)) { openProduct(product) } }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun Card(product: Product, modifier: Modifier, open: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    Column(modifier.clip(shape).background(Color.White).border(1.dp, Line, shape).clickable(onClick = open)) {
-        Thumb(product, Modifier.fillMaxWidth().aspectRatio(1.12f))
-        Column(Modifier.padding(11.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(product.title, color = Ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(product.maker, color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(product.price, Modifier.padding(top = 3.dp), color = Accent, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
 
 @Composable
 private fun CatalogRow(product: Product, open: () -> Unit) {
@@ -849,11 +760,6 @@ private fun CatalogRow(product: Product, open: () -> Unit) {
         }
         TinkuyIcon(AppIcon.ChevronRight, Modifier.size(18.dp), Muted)
     }
-}
-
-@Composable
-internal fun Thumb(product: Product, modifier: Modifier) {
-    Image(painterResource(product.photo), contentDescription = null, modifier = modifier, contentScale = ContentScale.Crop)
 }
 
 @Composable
