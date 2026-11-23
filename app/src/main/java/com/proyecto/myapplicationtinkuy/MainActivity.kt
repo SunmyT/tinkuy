@@ -57,6 +57,9 @@ import com.proyecto.myapplicationtinkuy.Product.Retablo
 import com.proyecto.myapplicationtinkuy.Product.Sheep
 import com.proyecto.myapplicationtinkuy.ui.theme.MyApplicationTinkuyTheme
 
+import com.proyecto.myapplicationtinkuy.ui.screens.login.LoginScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.welcome.WelcomeScreen
+
 internal val Ink = Color(0xFF1D2723)
 internal val Muted = Color(0xFF586761)
 internal val Line = Color(0xFFDFE6E2)
@@ -158,8 +161,15 @@ private fun TinkuyApp() {
     }
     BackHandler(enabled = history.size > 1, onBack = back)
     when (screen) {
-        Screen.Welcome -> Welcome(go)
-        Screen.Login -> Login(go)
+        Screen.Welcome -> WelcomeScreen(
+            onLoginClick = { go(Screen.Login) },
+            onCreateAccountClick = { go(Screen.Register) }
+        )
+        Screen.Login -> LoginScreen(
+            onLoginSuccess = { go(Screen.Home) },
+            onForgotPassword = { go(Screen.Forgot) },
+            onRegister = { go(Screen.Register) }
+        )
         Screen.Register -> Register(go)
         Screen.Password -> Password(go)
         Screen.Verify -> Verify(go)
