@@ -60,6 +60,8 @@ import com.proyecto.myapplicationtinkuy.ui.screens.login.LoginScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.welcome.WelcomeScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.RegisterScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.login.PasswordScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.login.VerifyScreen
+import com.proyecto.myapplicationtinkuy.ui.screens.login.ForgotPasswordScreen
 
 internal val Ink = Color(0xFF1D2723)
 internal val Muted = Color(0xFF586761)
@@ -179,8 +181,15 @@ private fun TinkuyApp() {
             onBack = { go(Screen.Register) },
             onCreateAccount = { go(Screen.Verify) }
         )
-        Screen.Verify -> Verify(go)
-        Screen.Forgot -> Forgot(go)
+        Screen.Verify -> VerifyScreen(
+            onBack = { go(Screen.Password) },
+            onVerify = { go(Screen.Home) },
+            onResend = { /* Pendiente de integrar SMS */ }
+        )
+        Screen.Forgot -> ForgotPasswordScreen(
+            onBack = { go(Screen.Login) },
+            onSendInstructions = { go(Screen.Login) }
+        )
         Screen.Home -> Home(go, homeCategory, { homeCategory = it }, homeQuery, { homeQuery = it }, openProduct)
         Screen.Catalog -> Catalog(go, catalogCategory, { catalogCategory = it }, catalogQuery, { catalogQuery = it }, openProduct)
         Screen.Detail -> Detail(product, go, back) { changeQuantity(product, 1) }
@@ -263,29 +272,6 @@ private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
 
 
 
-@Composable
-private fun Verify(go: (Screen) -> Unit) {
-    var code by rememberSaveable { mutableStateOf(List(5) { "" }) }
-    Form(true, { go(Screen.Password) }) {
-        Spacer(Modifier.height(98.dp)); Text("Verifica tu número", fontSize = 26.sp); Text("Hemos enviado un código de verificación\npor SMS", color = Muted, fontSize = 16.sp, lineHeight = 23.sp)
-        Spacer(Modifier.height(47.dp)); Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            code.indices.forEach { i -> OutlinedTextField(code[i], { v -> code = code.toMutableList().also { it[i] = v.take(1) } }, Modifier.weight(1f).height(57.dp), singleLine = true, textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center), shape = RoundedCornerShape(5.dp)) }
-        }
-        Spacer(Modifier.height(36.dp)); Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { Text("¿No recibiste el código?  ", fontSize = 14.sp); Text("Reenviar código", fontSize = 14.sp, textDecoration = TextDecoration.Underline) }
-        Spacer(Modifier.height(58.dp)); BlackButton("Verificar", Modifier.fillMaxWidth().padding(horizontal = 30.dp)) { go(Screen.Home) }; Spacer(Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun Forgot(go: (Screen) -> Unit) {
-    var email by rememberSaveable { mutableStateOf("") }
-    Form(true, { go(Screen.Login) }) {
-        Spacer(Modifier.height(110.dp)); Text("Recupera tu contraseña", fontSize = 26.sp); Spacer(Modifier.height(12.dp))
-        Text("Ingresa tu correo electrónico y te enviaremos instrucciones para recuperar tu acceso.", color = Muted, fontSize = 16.sp, lineHeight = 23.sp)
-        Spacer(Modifier.height(32.dp)); Field("Correo electrónico", email, { email = it }, key = KeyboardType.Email); Spacer(Modifier.height(22.dp))
-        BlackButton("Enviar instrucciones", Modifier.fillMaxWidth()) { go(Screen.Login) }; Spacer(Modifier.weight(1f))
-    }
-}
 
 @Composable
 private fun Home(
