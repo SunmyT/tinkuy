@@ -255,24 +255,6 @@ private fun BottomNav(screen: Screen, go: (Screen) -> Unit) {
 }
 
 @Composable
-private fun Welcome(go: (Screen) -> Unit) {
-    Column(Modifier.fillMaxSize()) {
-        Box(Modifier.weight(1f).fillMaxWidth().background(Color(0xFFF4F4F4)), contentAlignment = Alignment.Center) { Placeholder(Modifier.size(64.dp), true) }
-        Column(Modifier.padding(17.dp, 42.dp)) {
-            Text("TINKUY", fontSize = 36.sp, letterSpacing = 1.sp)
-            Text("Conecta. Descubre. Compra.", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(21.dp))
-            Text("Explora productos, solicita cotizaciones y\nconecta directamente con productores", color = Muted, fontSize = 16.sp, lineHeight = 23.sp)
-            Spacer(Modifier.height(37.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                BlackButton("Iniciar Sesión", Modifier.weight(1f)) { go(Screen.Login) }
-                BlackButton("Crear Cuenta", Modifier.weight(1f)) { go(Screen.Register) }
-            }
-        }
-    }
-}
-
-@Composable
 private fun Login(go: (Screen) -> Unit) {
     var email by rememberSaveable { mutableStateOf("") }; var password by rememberSaveable { mutableStateOf("") }
     Form(false, {}) {
