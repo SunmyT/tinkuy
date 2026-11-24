@@ -58,7 +58,6 @@ import com.proyecto.myapplicationtinkuy.ui.order.TrackingScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.CatalogScreen
 import com.proyecto.myapplicationtinkuy.ui.screens.DetailScreen
 import com.proyecto.myapplicationtinkuy.ui.components.Avatar
-import com.proyecto.myapplicationtinkuy.ui.components.Placeholder
 import com.proyecto.myapplicationtinkuy.ui.components.BlackButton
 import com.proyecto.myapplicationtinkuy.ui.components.Tabs
 import com.proyecto.myapplicationtinkuy.ui.screens.ProducerScreen
@@ -67,6 +66,10 @@ import com.proyecto.myapplicationtinkuy.ui.theme.AppBackground
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Line
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.proyecto.myapplicationtinkuy.ui.auth.AuthViewModel
+
 
 
 internal val Accent = Color(0xFF17594D)
@@ -101,7 +104,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun TinkuyApp() {
-    var history by rememberSaveable { mutableStateOf(arrayListOf(Screen.Welcome.name)) }
+    val authVm: AuthViewModel = viewModel() // NUEVO
+    val authState by authVm.state.collectAsStateWithLifecycle() // NUEVO
+    var history by rememberSaveable { // CAMBIO: si ya inició sesión, abre en Home
+        mutableStateOf(arrayListOf(if (authVm.isLoggedIn) Screen.Home.name else Screen.Welcome.name))
+    }
     var homeCategory by rememberSaveable { mutableStateOf(Category.All) }
     var catalogCategory by rememberSaveable { mutableStateOf(Category.All) }
     var homeQuery by rememberSaveable { mutableStateOf("") }
@@ -118,10 +125,11 @@ private fun TinkuyApp() {
         })
     }
     val screen = Screen.valueOf(history.last())
+    LaunchedEffect(screen) { authVm.clearMessages() } // NUEVO
     val go: (Screen) -> Unit = { destination ->
         if (destination != screen) {
             val isSessionBoundary = destination == Screen.Welcome ||
-                (destination == Screen.Home && history.first() == Screen.Welcome.name)
+                    (destination == Screen.Home && history.first() == Screen.Welcome.name)
             val previousIndex = history.indexOf(destination.name)
             history = when {
                 isSessionBoundary -> arrayListOf(destination.name)
@@ -170,27 +178,36 @@ private fun TinkuyApp() {
             onLoginClick = { go(Screen.Login) },
             onCreateAccountClick = { go(Screen.Register) }
         )
-        Screen.Login -> LoginScreen(
-            onLoginSuccess = { go(Screen.Home) },
+        Screen.Login -> LoginScreen( // CAMBIO
+            state = authState,
+            onLogin = { email, pass -> authVm.login(email, pass) { go(Screen.Home) } },
             onForgotPassword = { go(Screen.Forgot) },
             onRegister = { go(Screen.Register) }
         )
-        Screen.Register -> RegisterScreen(
+        Screen.Register -> RegisterScreen( // CAMBIO
             onBack = { go(Screen.Login) },
-            onNext = { go(Screen.Password) }
+            onNext = { n, s, e, p ->
+                authVm.saveRegistration(n, s, e, p)
+                go(Screen.Password)
+            }
         )
-        Screen.Password -> PasswordScreen(
+        Screen.Password -> PasswordScreen( // CAMBIO
+            state = authState,
             onBack = { go(Screen.Register) },
-            onCreateAccount = { go(Screen.Verify) }
+            onCreateAccount = { pass -> authVm.register(pass) { go(Screen.Verify) } }
         )
-        Screen.Verify -> VerifyScreen(
-            onBack = { go(Screen.Password) },
-            onVerify = { go(Screen.Home) },
-            onResend = { /* Pendiente de integrar SMS */ }
-        )
-        Screen.Forgot -> ForgotPasswordScreen(
+        Screen.Verify -> VerifyScreen( // CAMBIO
+            state = authState,
+            email = authVm.currentUser?.email ?: "",
             onBack = { go(Screen.Login) },
-            onSendInstructions = { go(Screen.Login) }
+            onVerify = { authVm.checkVerified { go(Screen.Home) } },
+            onResend = { authVm.resendVerification() }
+        )
+        Screen.Forgot -> ForgotPasswordScreen( // CAMBIO
+            state = authState,
+            onBack = { go(Screen.Login) },
+            onSendInstructions = { email -> authVm.resetPassword(email) },
+            onBackToLogin = { go(Screen.Login) }
         )
         Screen.Home -> HomeScreen(
             go,
@@ -234,7 +251,12 @@ private fun TinkuyApp() {
             go,
             back
         )
-        Screen.Profile -> Profile(go)
+        Screen.Profile -> Profile( // CAMBIO
+            go,
+            name = authVm.currentUser?.name ?: "Usuario",
+            email = authVm.currentUser?.email ?: "",
+            onLogout = { authVm.logout(); go(Screen.Welcome) }
+        )
         Screen.Account -> Account(go)
         Screen.History -> History(go)
         Screen.Notifications -> NotificationsScreen(go, back)
@@ -315,18 +337,21 @@ private fun Quote(product: Product, go: (Screen) -> Unit) {
         }
     }
 }
-
 @Composable
 private fun QuoteDone(product: Product, go: (Screen) -> Unit) = Page(Screen.QuoteDone, go, false) { Success("Solicitud enviada", "${product.producer} recibió tu solicitud. Podrás revisar su propuesta en Mis cotizaciones.", "Ver mis cotizaciones") { go(Screen.Requests) } }
-
 @Composable
-private fun Profile(go: (Screen) -> Unit) = Page(Screen.Profile, go) {
+private fun Profile(
+    go: (Screen) -> Unit,
+    name: String,
+    email: String,
+    onLogout: () -> Unit
+) = Page(Screen.Profile, go) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(32.dp)); Avatar(Modifier.size(106.dp)); Spacer(Modifier.height(9.dp)); Text("Usuario A", fontSize = 18.sp, fontWeight = FontWeight.Bold); Text("usuarioTinkuy@gmail.com", color = Muted, fontSize = 14.sp); Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(32.dp)); Avatar(Modifier.size(106.dp)); Spacer(Modifier.height(9.dp)); Text(name, fontSize = 18.sp, fontWeight = FontWeight.Bold); Text(email, color = Muted, fontSize = 14.sp); Spacer(Modifier.height(14.dp))
         Menu("♙", "Mi cuenta") { go(Screen.Account) }; Menu("▤", "Mis pedidos") { go(Screen.Orders) }; Menu("≡", "Historial Comercial") { go(Screen.History) }; Menu("♟", "Notificaciones") { go(Screen.Notifications) }; Menu("⚙", "Configuración") { go(Screen.Settings) }; Menu("♧", "Ayuda") { go(Screen.Help) }
         Spacer(Modifier.height(24.dp))
         Row(Modifier.fillMaxWidth().padding(horizontal = 33.dp).clip(RoundedCornerShape(7.dp)).background(Color(0xFFFAFAFA)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Text("✿", fontSize = 30.sp); Column(Modifier.padding(start = 10.dp)) { Text("¿También produces artesanías?", fontSize = 11.sp); Text("Solicita la habilitación de tu perfil comercial\nComenzar solicitud ›", fontSize = 9.sp, color = Color(0xFF555555)) } }
-        Text("⇥ Log Out", Modifier.fillMaxWidth().padding(35.dp, 20.dp).clickable { go(Screen.Welcome) }, color = Color.Red, fontSize = 16.sp)
+        Text("⇥ Log Out", Modifier.fillMaxWidth().padding(35.dp, 20.dp).clickable { onLogout() }, color = Color.Red, fontSize = 16.sp)
     }
 }
 

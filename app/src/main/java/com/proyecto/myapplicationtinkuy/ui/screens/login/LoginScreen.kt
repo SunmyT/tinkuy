@@ -32,12 +32,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.proyecto.myapplicationtinkuy.R
+import com.proyecto.myapplicationtinkuy.ui.auth.AuthUiState
 import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen
 import androidx.compose.ui.text.font.FontFamily
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    state: AuthUiState,
+    onLogin: (email: String, password: String) -> Unit,
     onForgotPassword: () -> Unit,
     onRegister: () -> Unit
 ) {
@@ -133,19 +135,23 @@ fun LoginScreen(
 
         Spacer(Modifier.height(9.dp))
 
+        state.error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Spacer(Modifier.height(6.dp))
+        }
+
         Button(
             onClick = {
                 submitted = true
-                if (emailValid && passwordValid) {
-                    onLoginSuccess()
-                }
+                if (emailValid && passwordValid) onLogin(email.trim(), password)
             },
+            enabled = !state.loading,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = TinkuyGreen
             )
         ) {
-            Text("Ingresar")
+            Text(if (state.loading) "Ingresando..." else "Ingresar")
         }
 
         Spacer(Modifier.weight(1f))

@@ -1,4 +1,3 @@
-
 package com.proyecto.myapplicationtinkuy.ui.screens.login
 
 import androidx.compose.foundation.layout.*
@@ -13,11 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.proyecto.myapplicationtinkuy.ui.auth.AuthUiState
 
 @Composable
 fun ForgotPasswordScreen(
+    state: AuthUiState,
     onBack: () -> Unit,
-    onSendInstructions: () -> Unit
+    onSendInstructions: (email: String) -> Unit,
+    onBackToLogin: () -> Unit
 ) {
     var email by rememberSaveable { mutableStateOf("") }
 
@@ -42,10 +44,7 @@ fun ForgotPasswordScreen(
 
         Spacer(Modifier.height(75.dp))
 
-        Text(
-            text = "Recupera tu contraseña",
-            fontSize = 26.sp
-        )
+        Text(text = "Recupera tu contraseña", fontSize = 26.sp)
 
         Spacer(Modifier.height(12.dp))
 
@@ -63,9 +62,7 @@ fun ForgotPasswordScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Correo electrónico") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             shape = RoundedCornerShape(8.dp),
             isError = email.isNotEmpty() && !validEmail
         )
@@ -80,13 +77,37 @@ fun ForgotPasswordScreen(
 
         Spacer(Modifier.height(22.dp))
 
+        if (state.resetSent) {
+            Text(
+                "Si el correo está registrado, recibirás las instrucciones. Revisa también la carpeta de spam.",
+                fontSize = 13.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        state.error?.let {
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
         Button(
-            onClick = onSendInstructions,
+            onClick = {
+                if (state.resetSent) onBackToLogin() else onSendInstructions(email.trim())
+            },
             modifier = Modifier.fillMaxWidth(),
-            enabled = validEmail,
+            enabled = validEmail && !state.loading,
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Enviar instrucciones")
+            Text(
+                when {
+                    state.loading -> "Enviando..."
+                    state.resetSent -> "Volver a iniciar sesión"
+                    else -> "Enviar instrucciones"
+                }
+            )
         }
 
         Spacer(Modifier.weight(1f))

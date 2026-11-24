@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.proyecto.myapplicationtinkuy.ui.auth.AuthUiState
 import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen
 import com.proyecto.myapplicationtinkuy.ui.theme.PasswordWeak
 import com.proyecto.myapplicationtinkuy.ui.theme.PasswordMedium
@@ -39,8 +40,9 @@ import com.proyecto.myapplicationtinkuy.ui.theme.PasswordStrong
 
 @Composable
 fun PasswordScreen(
+    state: AuthUiState,
     onBack: () -> Unit,
-    onCreateAccount: () -> Unit
+    onCreateAccount: (password: String) -> Unit
 ) {
     var password by remember { mutableStateOf("") }
     var repeat by remember { mutableStateOf("") }
@@ -178,15 +180,23 @@ fun PasswordScreen(
             )
         }
 
+        state.error?.let {
+            Text(
+                text = it,
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp),
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp
+            )
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Button(
             onClick = {
                 submitted = true
-                if (passwordValid && passwordsMatch) {
-                    onCreateAccount()
-                }
+                if (passwordValid && passwordsMatch) onCreateAccount(password)
             },
+            enabled = !state.loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
@@ -195,7 +205,7 @@ fun PasswordScreen(
                 containerColor = TinkuyGreen
             )
         ) {
-            Text("Crear cuenta")
+            Text(if (state.loading) "Creando cuenta..." else "Crear cuenta")
         }
 
         Spacer(Modifier.weight(1f))

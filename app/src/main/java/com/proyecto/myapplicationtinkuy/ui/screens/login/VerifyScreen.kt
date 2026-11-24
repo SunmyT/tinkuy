@@ -1,34 +1,27 @@
-
 package com.proyecto.myapplicationtinkuy.ui.screens.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.proyecto.myapplicationtinkuy.ui.auth.AuthUiState
 
 @Composable
 fun VerifyScreen(
+    state: AuthUiState,
+    email: String,
     onBack: () -> Unit,
     onVerify: () -> Unit,
     onResend: () -> Unit
 ) {
-    var code by rememberSaveable {
-        mutableStateOf(List(5) { "" })
-    }
-
-    val completeCode = code.all { it.isNotEmpty() }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,85 +39,48 @@ fun VerifyScreen(
 
         Spacer(Modifier.height(70.dp))
 
-        Text(
-            text = "Verifica tu número",
-            fontSize = 26.sp
-        )
+        Text(text = "Verifica tu correo", fontSize = 26.sp)
 
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Hemos enviado un código de verificación\npor SMS",
+            text = "Enviamos un enlace de verificación a\n$email\nÁbrelo y luego pulsa el botón.",
             fontSize = 16.sp,
             lineHeight = 23.sp
         )
 
-        Spacer(Modifier.height(47.dp))
+        Spacer(Modifier.height(36.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            code.indices.forEach { index ->
-                OutlinedTextField(
-                    value = code[index],
-                    onValueChange = { value ->
-                        if (value.all { it.isDigit() } && value.length <= 1) {
-                            code = code.toMutableList().also {
-                                it[index] = value
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(57.dp),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    shape = RoundedCornerShape(5.dp)
-                )
-            }
+        (state.info ?: state.error)?.let {
+            Text(text = it, fontSize = 14.sp)
+            Spacer(Modifier.height(12.dp))
         }
 
-        Spacer(Modifier.height(36.dp))
+        Button(
+            onClick = onVerify,
+            enabled = !state.loading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(if (state.loading) "Comprobando..." else "Ya verifiqué mi correo")
+        }
+
+        Spacer(Modifier.height(24.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(text = "¿No te llegó? ", fontSize = 14.sp)
             Text(
-                text = "¿No recibiste el código? ",
-                fontSize = 14.sp
-            )
-
-            Text(
-                text = "Reenviar código",
+                text = "Reenviar correo",
                 fontSize = 14.sp,
-                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                modifier = Modifier.clickable {
-                    code = List(5) { "" }
-                    onResend()
-                }
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable { onResend() }
             )
-        }
-
-        Spacer(Modifier.height(58.dp))
-
-        Button(
-            onClick = onVerify,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp),
-            enabled = completeCode,
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Verificar")
         }
 
         Spacer(Modifier.weight(1f))

@@ -35,7 +35,7 @@ import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen
 @Composable
 fun RegisterScreen(
     onBack: () -> Unit,
-    onNext: () -> Unit
+    onNext: (name: String, surname: String, email: String, phone: String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -145,7 +145,7 @@ fun RegisterScreen(
             onClick = {
                 submitted = true
                 if (nameValid && surnameValid && emailValid && phoneValid) {
-                    onNext()
+                    onNext(name.trim(), surname.trim(), email.trim(), phone)
                 }
             },
             modifier = Modifier
