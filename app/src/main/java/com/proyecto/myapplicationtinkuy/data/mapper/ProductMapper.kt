@@ -1,11 +1,11 @@
 ﻿package com.proyecto.myapplicationtinkuy.data.mapper
 
-import android.content.Context
+import androidx.annotation.DrawableRes
 import com.proyecto.myapplicationtinkuy.Product
+import com.proyecto.myapplicationtinkuy.R
 import com.proyecto.myapplicationtinkuy.data.local.entity.ProductEntity
 
-/** Convierte el enum actual en fila de base de datos (sirve para la carga inicial). */
-internal fun Product.toEntity(context: Context) = ProductEntity(
+internal fun Product.toEntity() = ProductEntity(
     id = name,
     title = title,
     producer = producer,
@@ -13,13 +13,18 @@ internal fun Product.toEntity(context: Context) = ProductEntity(
     unitPrice = unitPrice,
     category = category?.name,
     description = description,
-    photoName = context.resources.getResourceEntryName(photo)
+    photoName = name // la clave es el id del producto
 )
 
-/** Lista completa para sembrar la base la primera vez. */
-internal fun seedProducts(context: Context): List<ProductEntity> =
-    Product.entries.map { it.toEntity(context) }
+internal fun seedProducts(): List<ProductEntity> =
+    Product.entries.map { it.toEntity() }
 
-/** Obtiene el id del drawable a partir del nombre guardado. */
-fun ProductEntity.photoRes(context: Context): Int =
-    context.resources.getIdentifier(photoName, "drawable", context.packageName)
+@DrawableRes
+internal fun ProductEntity.photoRes(): Int = when (id) {
+    Product.Alpaca.name -> R.drawable.product_alpaca
+    Product.Ceramic.name -> R.drawable.product_ceramic
+    Product.Sheep.name -> R.drawable.product_wool
+    Product.Retablo.name -> R.drawable.product_retablo
+    Product.Coffee.name -> R.drawable.product_coffee
+    else -> R.drawable.product_alpaca
+}

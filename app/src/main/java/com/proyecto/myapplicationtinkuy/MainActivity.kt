@@ -70,7 +70,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.myapplicationtinkuy.ui.auth.AuthViewModel
 
-
+import com.proyecto.myapplicationtinkuy.ui.products.ProductViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 internal val Accent = Color(0xFF17594D)
 private val AccentSoft = Color(0xFFE4F0EA)
@@ -106,6 +108,10 @@ class MainActivity : ComponentActivity() {
 private fun TinkuyApp() {
     val authVm: AuthViewModel = viewModel() // NUEVO
     val authState by authVm.state.collectAsStateWithLifecycle() // NUEVO
+    val productVm: ProductViewModel = viewModel()
+    val dbProducts by productVm.products.collectAsStateWithLifecycle()
+    LaunchedEffect(dbProducts) { android.util.Log.d("TinkuyDB", "Productos en Room: ${dbProducts.size}") }
+
     var history by rememberSaveable { // CAMBIO: si ya inició sesión, abre en Home
         mutableStateOf(arrayListOf(if (authVm.isLoggedIn) Screen.Home.name else Screen.Welcome.name))
     }
