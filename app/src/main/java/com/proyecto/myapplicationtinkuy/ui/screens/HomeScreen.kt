@@ -25,7 +25,7 @@ import com.proyecto.myapplicationtinkuy.ui.components.Page
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
 import com.proyecto.myapplicationtinkuy.ui.theme.TinkuyGreen
-
+import com.proyecto.myapplicationtinkuy.data.local.entity.ProductEntity
 @Composable
 internal fun HomeScreen(
     go: (Screen) -> Unit,
@@ -33,11 +33,12 @@ internal fun HomeScreen(
     selectCategory: (Category) -> Unit,
     query: String,
     onQueryChange: (String) -> Unit,
-    openProduct: (Product) -> Unit
+    openProduct: (Product) -> Unit,
+    items: List<ProductEntity>
 ) = Page(Screen.Home, go) {
     val focus = LocalFocusManager.current
-    val products = remember(category, query) {
-        category.products(query)
+    val products = remember(items, category, query) {
+        category.filter(items, query).mapNotNull { it.toProduct() }
     }
 
     Column(
@@ -121,10 +122,11 @@ internal fun HomeScreen(
             fontWeight = FontWeight.SemiBold
         )
 
-        if (products.isEmpty()) {
-            EmptySearch {
-                onQueryChange("")
-            }
+        if (items.isEmpty()) {
+            //
+        } else if (products.isEmpty()) {
+                EmptySearch { onQueryChange("") }
+
         } else {
             Grid(
                 products = products,

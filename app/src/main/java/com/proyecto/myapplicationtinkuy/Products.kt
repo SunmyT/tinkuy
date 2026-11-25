@@ -1,5 +1,6 @@
 package com.proyecto.myapplicationtinkuy
 
+import com.proyecto.myapplicationtinkuy.data.local.entity.ProductEntity
 import java.text.Normalizer
 import java.util.Locale
 
@@ -50,3 +51,23 @@ internal enum class Product(
 }
 
 internal fun soles(amount: Int): String = "S/ $amount.00"
+
+// --- Puente Room -> enum (temporal mientras migramos las pantallas) ---
+
+internal fun ProductEntity.toProduct(): Product? =
+    Product.entries.firstOrNull { it.name == id }
+
+private fun ProductEntity.searchText(): String =
+    listOf(
+        title, producer, region,
+        category?.let { Category.valueOf(it).label }.orEmpty(),
+        description
+    ).joinToString(" ").searchable()
+
+internal fun Category.filter(items: List<ProductEntity>, query: String): List<ProductEntity> {
+    val terms = query.trim().searchable().split(whitespace).filter(String::isNotEmpty)
+    return items.filter { item ->
+        (this == Category.All || item.category == this.name) &&
+                terms.all { it in item.searchText() }
+    }
+}

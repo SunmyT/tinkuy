@@ -39,7 +39,9 @@ import com.proyecto.myapplicationtinkuy.ui.components.Thumb
 import com.proyecto.myapplicationtinkuy.ui.theme.Ink
 import com.proyecto.myapplicationtinkuy.ui.theme.Line
 import com.proyecto.myapplicationtinkuy.ui.theme.Muted
-
+import com.proyecto.myapplicationtinkuy.data.local.entity.ProductEntity
+import com.proyecto.myapplicationtinkuy.filter
+import com.proyecto.myapplicationtinkuy.toProduct
 @Composable
 internal fun CatalogScreen(
     go: (Screen) -> Unit,
@@ -47,11 +49,12 @@ internal fun CatalogScreen(
     selectCategory: (Category) -> Unit,
     query: String,
     onQueryChange: (String) -> Unit,
-    openProduct: (Product) -> Unit
+    openProduct: (Product) -> Unit,
+    items: List<ProductEntity>
 ) = Page(Screen.Catalog, go) {
     val focus = LocalFocusManager.current
-    val products = remember(category, query) {
-        category.products(query)
+    val products = remember(items, category, query) {
+        category.filter(items, query).mapNotNull { it.toProduct() }
     }
 
     Column(
@@ -75,10 +78,9 @@ internal fun CatalogScreen(
             selectCategory(it)
         })
 
-        if (products.isEmpty()) {
-            EmptySearch {
-                onQueryChange("")
-            }
+        if (items.isEmpty()) {
+            //
+        } else if (products.isEmpty()) {
         } else {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)

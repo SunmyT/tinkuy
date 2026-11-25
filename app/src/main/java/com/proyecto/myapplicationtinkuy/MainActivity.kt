@@ -216,20 +216,12 @@ private fun TinkuyApp() {
             onBackToLogin = { go(Screen.Login) }
         )
         Screen.Home -> HomeScreen(
-            go,
-            homeCategory,
-            { homeCategory = it },
-            homeQuery,
-            { homeQuery = it },
-            openProduct
+            go, homeCategory, { homeCategory = it }, homeQuery, { homeQuery = it },
+            openProduct, dbProducts
         )
         Screen.Catalog -> CatalogScreen(
-            go,
-            catalogCategory,
-            { catalogCategory = it },
-            catalogQuery,
-            { catalogQuery = it },
-            openProduct
+            go, catalogCategory, { catalogCategory = it }, catalogQuery, { catalogQuery = it },
+            openProduct, dbProducts
         )
         Screen.Detail -> DetailScreen(
             product,
