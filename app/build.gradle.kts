@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services") // NUEVO
+    alias(libs.plugins.ksp) // NUEVO (Room)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -55,10 +56,18 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.9.6")
-    implementation(libs.androidx.lifecycle.viewmodel.compose)   // NUEVA
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
-    // NUEVO: Firebase
+    // Room (base de datos local)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    // Para usar .await() con las tareas de Firebase
+    implementation(libs.coroutines.play)
+
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
